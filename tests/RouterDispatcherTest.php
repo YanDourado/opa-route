@@ -2,7 +2,7 @@
 
 namespace OpaRoute\Test;
 
-use OpaRoute\Router;
+use OpaRoute\RouterDispatcher;
 use PHPUnit\Framework\TestCase;
 
 class RouterDispatcherTest extends TestCase
@@ -10,27 +10,20 @@ class RouterDispatcherTest extends TestCase
 
     public function testIfRouteExistItHasToCall()
     {
-        $_SERVER['REQUEST_URI']    = '/';
-        $_SERVER['REQUEST_METHOD'] = 'GET';
+        $routes = [
+            'GET'  => [
+                ['uri' => '/', 'callback' => function () {return 'Hello World!';}]
+            ],
+            'POST' => [
+                ['uri' => '/', 'callback' => function () {return ['name' => 'Yan Dourado'];}]
+            ]
+        ];
 
-        $router = new Router();
+        $dispatcher1 = new RouterDispatcher($routes);
+        $dispatcher2 = new RouterDispatcher($routes);
 
-        $router->get('/', function () {
-            return 'Hello World!';
-        });
-
-        $this->assertEquals('Hello World!', $router->execute());
-
-        $_SERVER['REQUEST_URI']    = '/';
-        $_SERVER['REQUEST_METHOD'] = 'GET';
-
-        $router = new Router();
-
-        $router->get('/', function () {
-            return ['name' => 'Yan Dourado'];
-        });
-
-        $this->assertEquals(json_encode(['name' => 'Yan Dourado']), $router->execute());
+        $this->assertEquals('Hello World!', $dispatcher1->dispatch('/', 'GET'));
+        $this->assertEquals(json_encode(['name' => 'Yan Dourado']), $dispatcher2->dispatch('/', 'POST'));
     }
 
     public function testErroRouteNotExist()
@@ -38,12 +31,15 @@ class RouterDispatcherTest extends TestCase
         $this->expectException(\Exception::class);
         $this->expectErrorMessage('Route not found');
 
-        $_SERVER['REQUEST_URI']    = '/foo';
-        $_SERVER['REQUEST_METHOD'] = 'GET';
+        $routes = [
+            'GET' => [
+                ['uri' => '/', 'callback' => function () {return 'Hello World!';}]
+            ]
+        ];
 
-        $router = new Router();
-        $router->get('/', function () {});
-        $router->execute();
+        $dispatcher = new RouterDispatcher($routes);
+
+        $dispatcher->dispatch('/foo', 'GET');
     }
 
     public function testErroMethodNotAllowed()
@@ -51,12 +47,15 @@ class RouterDispatcherTest extends TestCase
         $this->expectException(\Exception::class);
         $this->expectErrorMessage('Method not allowed');
 
-        $_SERVER['REQUEST_URI']    = '/';
-        $_SERVER['REQUEST_METHOD'] = 'POST';
+        $routes = [
+            'POST' => [
+                ['uri' => '/', 'callback' => function () {return 'Hello World!';}]
+            ]
+        ];
 
-        $router = new Router();
-        $router->get('/', function () {});
-        $router->execute();
+        $dispatcher = new RouterDispatcher($routes);
+
+        $dispatcher->dispatch('/', 'GET');
     }
 
 }
