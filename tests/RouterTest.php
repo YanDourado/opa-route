@@ -57,4 +57,17 @@ class RouterTest extends TestCase
         $this->assertEquals($routes, $router->routes());
     }
 
+    public function testWhenRouterIsCreatedRequestMustBeToo()
+    {
+        $_SERVER['REQUEST_URI']    = '/foo';
+        $_SERVER['REQUEST_METHOD'] = 'GET';
+
+        $router = new Router();
+
+        $this->assertEquals([
+            'uri'    => '/foo',
+            'method' => 'GET'
+        ], $router->request());
+    }
+
 }

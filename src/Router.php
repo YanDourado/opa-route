@@ -12,9 +12,15 @@ class Router
      */
     private array $routes;
 
+    /**
+     *  HTTP Request
+     */
+    private array $request;
+
     public function __construct()
     {
-        $this->routes = [];
+        $this->routes  = [];
+        $this->request = self::createRequest();
     }
 
     /**
@@ -76,6 +82,30 @@ class Router
     }
 
     /**
+     * Return URI and METHOD from HTTP request
+     *
+     * @return array
+     */
+    public function request(): array
+    {
+        return $this->request;
+    }
+
+    /**
+     * Execute a route
+     *
+     * @return mixed
+     */
+    public function execute()
+    {
+        $dispatcher = new RouterDispatcher($this->routes);
+        return $dispatcher->dispatch(
+            $this->request['uri'],
+            $this->request['method']
+        );
+    }
+
+    /**
      * Add Route to routes array
      *
      * @param string $method
@@ -95,5 +125,18 @@ class Router
         }
 
         $this->routes[$method][] = $route;
+    }
+
+    /**
+     * Create Request (URI and METHOD) from Globals
+     *
+     * @return array
+     */
+    private static function createRequest(): array
+    {
+        return [
+            'uri'    => isset($_SERVER['REQUEST_URI']) ? parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH) : null,
+            'method' => isset($_SERVER['REQUEST_METHOD']) ? parse_url($_SERVER['REQUEST_METHOD'], PHP_URL_PATH) : null
+        ];
     }
 }
