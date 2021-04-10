@@ -1,0 +1,30 @@
+{
+    "name": "yandourado/opa-route",
+    "description": "A route lib for PHP",
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Yan Dourado",
+            "email": "douradoyan@hotmail.com"
+        }
+    ],
+    "version": "v0.1",
+    "require": {
+        "php": ">=7.4"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^9.5"
+    },
+    "autoload": {
+        "psr-4": {
+            "OpaRoute\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "OpaRoute\\Test\\": "test/",
+            "OpaRoute\\Example\\": "example/"
+        }
+    }
+}

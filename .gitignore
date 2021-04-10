@@ -1,0 +1,8 @@
+/vendor/
+
+# VSCode
+.devcontainer
+
+# Docker
+docker
+docker-compose.yaml
