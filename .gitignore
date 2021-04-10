@@ -6,3 +6,8 @@
 # Docker
 docker
 docker-compose.yaml
+
+# PHPUnit
+.phpunit.cache
+.phpunit.result.cache
+tests/coverage/*
