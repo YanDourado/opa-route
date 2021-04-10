@@ -99,7 +99,7 @@ class Router
     public function execute()
     {
         $dispatcher = new RouterDispatcher($this->routes);
-        return $dispatcher->dispatch(
+        echo $dispatcher->dispatch(
             $this->request['uri'],
             $this->request['method']
         );
