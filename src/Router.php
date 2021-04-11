@@ -82,6 +82,29 @@ class Router
     }
 
     /**
+     * Get all routes created by HTTP method
+     *
+     * @param string $method
+     * @return array|null
+     */
+    public function getRoutesByMethod(string $method): ?array
+    {
+        return $this->routes[$method] ?? null;
+    }
+
+    /**
+     * Get all route except routes with HTTP method
+     */
+    public function getRoutesWithoutMethod(string $method): ?array
+    {
+        $routes = $this->routes();
+        unset($routes[$method]);
+        $routes = array_values($routes);
+        $routes = array_merge(...$routes);
+        return $routes;
+    }
+
+    /**
      * Return URI and METHOD from HTTP request
      *
      * @return array
@@ -92,13 +115,13 @@ class Router
     }
 
     /**
-     * Execute a route
+     * Find and execute function route
      *
      * @return mixed
      */
     public function execute()
     {
-        $dispatcher = new RouterDispatcher($this->routes);
+        $dispatcher = new RouterDispatcher($this);
         echo $dispatcher->dispatch(
             $this->request['uri'],
             $this->request['method']

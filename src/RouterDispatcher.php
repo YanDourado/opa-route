@@ -2,16 +2,18 @@
 
 namespace OpaRoute;
 
+use OpaRoute\Router;
+
 class RouterDispatcher
 {
     /**
      * Array with all routes
      */
-    private array $routes;
+    private Router $routes;
 
-    public function __construct(array $routes)
+    public function __construct(Router $router)
     {
-        $this->routes = $routes;
+        $this->router = $router;
     }
 
     /**
@@ -23,31 +25,25 @@ class RouterDispatcher
      */
     public function dispatch(string $uri, string $method)
     {
-        $methodRoutes = $this->getRoutesByMethod($method);
+        $methodRoutes = $this->router->getRoutesByMethod($method);
 
         if (null === $methodRoutes
-            && $this->routeExistsWithAnotherMethod($method, $uri)) {
+            && true === $this->routeExistsWithAnotherMethod($method, $uri)) {
             throw new \Exception('Method not allowed');
         }
 
         $route = $this->findRoute($methodRoutes, $uri);
+
+        if (null === $route
+            && true === $this->routeExistsWithAnotherMethod($method, $uri)) {
+            throw new \Exception('Method not allowed');
+        }
 
         if (null === $route) {
             throw new \Exception('Route not found');
         }
 
         return $this->handle($route);
-    }
-
-    /**
-     * Get all routes created by HTTP method
-     *
-     * @param string $method
-     * @return array|null
-     */
-    private function getRoutesByMethod(string $method): ?array
-    {
-        return $this->routes[$method] ?? null;
     }
 
     /**
@@ -89,9 +85,7 @@ class RouterDispatcher
      */
     private function routeExistsWithAnotherMethod(string $method, string $uri): bool
     {
-        $routesLessMethod = $this->routes;
-        unset($routesLessMethod[$method]);
-        array_values($routesLessMethod);
-        return (bool) null !== $this->findRoute($routesLessMethod, $uri);
+        $routesLessMethod = $this->router->getRoutesWithoutMethod($method);
+        return null !== $this->findRoute($routesLessMethod, $uri);
     }
 }

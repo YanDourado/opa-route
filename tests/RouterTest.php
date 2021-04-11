@@ -70,4 +70,19 @@ class RouterTest extends TestCase
         ], $router->request());
     }
 
+    public function testIfRouteExistItMustBeExecute()
+    {
+        $_SERVER['REQUEST_URI']    = '/';
+        $_SERVER['REQUEST_METHOD'] = 'GET';
+
+        $router = new Router();
+
+        $router->get('/', function () {
+            return 'Hello World!';
+        });
+
+        $router->execute();
+        $this->expectOutputString('Hello World!');
+    }
+
 }
