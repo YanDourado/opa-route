@@ -26,5 +26,8 @@
             "OpaRoute\\Test\\": "test/",
             "OpaRoute\\Example\\": "example/"
         }
+    },
+    "scripts": {
+        "test": "phpunit"
     }
 }
