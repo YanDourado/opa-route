@@ -85,4 +85,18 @@ class RouterTest extends TestCase
         $this->expectOutputString('Hello World!');
     }
 
+    public function testRouteParametersMustBePassedToFunction()
+    {
+        $_SERVER['REQUEST_URI']    = '/foo/hello/bar/world';
+        $_SERVER['REQUEST_METHOD'] = 'GET';
+
+        $router = new Router();
+        $router->get('/foo/{foo}/bar/{bar}', function ($foo, $bar) {
+            return "$foo $bar";
+        });
+
+        $router->execute();
+        $this->expectOutputString('hello world');
+    }
+
 }
