@@ -2,6 +2,7 @@
 
 namespace OpaRoute;
 
+use OpaRoute\Matcher;
 use OpaRoute\Router;
 
 class RouterDispatcher
@@ -11,9 +12,12 @@ class RouterDispatcher
      */
     private Router $routes;
 
+    private Matcher $matcher;
+
     public function __construct(Router $router)
     {
-        $this->router = $router;
+        $this->router  = $router;
+        $this->matcher = new Matcher();
     }
 
     /**
@@ -32,7 +36,7 @@ class RouterDispatcher
             throw new \Exception('Method not allowed');
         }
 
-        $route = $this->findRoute($methodRoutes, $uri);
+        $route = $this->matcher->findRoute($methodRoutes, $uri);
 
         if (null === $route
             && true === $this->routeExistsWithAnotherMethod($method, $uri)) {
@@ -47,19 +51,6 @@ class RouterDispatcher
     }
 
     /**
-     * Find a route by URI Request
-     *
-     * @param array $routes
-     * @param string $uri
-     * @return array|null
-     */
-    private function findRoute(array $routes, string $uri): ?array
-    {
-        $key = array_search($uri, array_column($routes, 'uri'));
-        return (false !== $key) ? $routes[$key] : null;
-    }
-
-    /**
      * Handle route callback
      *
      * @param array $route
@@ -67,7 +58,7 @@ class RouterDispatcher
      */
     private function handle(array $route)
     {
-        $response = $route['callback']();
+        $response = $route['callback'](...$this->matcher->parameters());
 
         if (is_array($response)) {
             $response = json_encode($response);
@@ -86,6 +77,6 @@ class RouterDispatcher
     private function routeExistsWithAnotherMethod(string $method, string $uri): bool
     {
         $routesLessMethod = $this->router->getRoutesWithoutMethod($method);
-        return null !== $this->findRoute($routesLessMethod, $uri);
+        return null !== $this->matcher->findRoute($routesLessMethod, $uri);
     }
 }
