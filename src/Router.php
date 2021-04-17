@@ -27,10 +27,10 @@ class Router
      * Add GET route to routes array
      *
      * @param string $uri
-     * @param callable $callback
+     * @param mixed $callback
      * @return void
      */
-    public function get(string $uri, callable $callback, ?string $name = null): void
+    public function get(string $uri, $callback, ?string $name = null): void
     {
         $this->addRoute('GET', $uri, $callback, $name);
     }
@@ -39,10 +39,10 @@ class Router
      * Add POST route to routes array
      *
      * @param string $uri
-     * @param callable $callback
+     * @param mixed $callback
      * @return void
      */
-    public function post(string $uri, callable $callback, ?string $name = null): void
+    public function post(string $uri, $callback, ?string $name = null): void
     {
         $this->addRoute('POST', $uri, $callback, $name);
     }
@@ -51,10 +51,10 @@ class Router
      * Add PUT route to routes array
      *
      * @param string $uri
-     * @param callable $callback
+     * @param mixed $callback
      * @return void
      */
-    public function put(string $uri, callable $callback, ?string $name = null): void
+    public function put(string $uri, $callback, ?string $name = null): void
     {
         $this->addRoute('PUT', $uri, $callback, $name);
     }
@@ -63,10 +63,10 @@ class Router
      * Add DELETE route to routes array
      *
      * @param string $uri
-     * @param callable $callback
+     * @param mixed $callback
      * @return void
      */
-    public function delete(string $uri, callable $callback, ?string $name = null): void
+    public function delete(string $uri, $callback, ?string $name = null): void
     {
         $this->addRoute('DELETE', $uri, $callback, $name);
     }
@@ -133,10 +133,10 @@ class Router
      *
      * @param string $method
      * @param string $uri
-     * @param callable $callback
+     * @param mixed $callback
      * @return void
      */
-    private function addRoute(string $method, string $uri, callable $callback, ?string $name = null): void
+    private function addRoute(string $method, string $uri, $callback, ?string $name = null): void
     {
         $route = [
             'uri'      => $uri,
