@@ -6,6 +6,8 @@
 ```php
 <?php
 
+// route.php
+
 use OpaRoute\Router;
 
 $router = new Router();
@@ -20,4 +22,21 @@ $router->get('/users/{id}/save', [\Namespace\UserController::class, 'post']);
 
 
 $router->execute();
+
+
+// UserController.php
+
+class UserController
+{
+    public function get($id)
+    {
+        return 'User: #' . $id;
+    }
+
+    public function post($id)
+    {
+        // Save user
+    }
+}
+
 ```
