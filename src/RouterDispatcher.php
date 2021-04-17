@@ -58,13 +58,52 @@ class RouterDispatcher
      */
     private function handle(array $route)
     {
-        $response = $route['callback'](...$this->matcher->parameters());
+        if (true === is_callable($route['callback'])) {
+            $response = $this->handleFunction($route['callback']);
+        }
 
-        if (is_array($response)) {
+        if (true === is_string($route['callback'])) {
+            $response = $this->handleController($route['callback']);
+        }
+
+        if (true === is_array($response)) {
             $response = json_encode($response);
         }
 
         return $response;
+    }
+
+    /**
+     * Handle function route
+     *
+     * @param callable $callback
+     * @return mixed
+     */
+    private function handleFunction(callable $callback)
+    {
+        return $callback(...$this->matcher->parameters());
+    }
+
+    /**
+     * Handle function in a Controller
+     *
+     * @param string $callback
+     * @return mixed
+     */
+    private function handleController(string $callback)
+    {
+        list($controller, $method) = explode('@', $callback);
+
+        if (false === class_exists($controller)) {
+            throw new \Exception("Class $controller don't exist.");
+        }
+
+        if (false === method_exists($controller, $method)) {
+            throw new \Exception("Method $method don't exist in $controller class.");
+        }
+
+        $instance = new $controller();
+        return $instance->$method(...$this->matcher->parameters());
     }
 
     /**
