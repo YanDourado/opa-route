@@ -12,16 +12,16 @@ class RouterTest extends TestCase
     {
         $router = new Router();
 
-        $router->get('/', function () {});
-        $router->post('/', function () {});
-        $router->put('/', function () {});
-        $router->delete('/', function () {});
+        $routerGet = $router->get('/', function () {});
+        $routerPost = $router->post('/', function () {});
+        $routerPut = $router->put('/', function () {});
+        $routerDelete = $router->delete('/', function () {});
 
         $routes = [
-            'GET'    => [['uri' => '/', 'callback' => function () {}]],
-            'POST'   => [['uri' => '/', 'callback' => function () {}]],
-            'PUT'    => [['uri' => '/', 'callback' => function () {}]],
-            'DELETE' => [['uri' => '/', 'callback' => function () {}]]
+            'GET'    => [$routerGet],
+            'POST'   => [$routerPost],
+            'PUT'    => [$routerPut],
+            'DELETE' => [$routerDelete]
         ];
 
         $this->assertEquals($routes, $router->routes());
@@ -31,13 +31,12 @@ class RouterTest extends TestCase
     {
         $router = new Router();
 
-        $router->get('/foo', function () {});
-        $router->get('/bar', function () {});
+        $routeFoo = $router->get('/foo', function () {});
+        $routeBar = $router->get('/bar', function () {});
 
         $routes = [
             'GET' => [
-                ['uri' => '/foo', 'callback' => function () {}],
-                ['uri' => '/bar', 'callback' => function () {}]
+                $routeFoo, $routeBar
             ]
         ];
 
@@ -48,10 +47,10 @@ class RouterTest extends TestCase
     {
         $router = new Router();
 
-        $router->get('/', function () {}, 'index');
+        $route = $router->get('/', function () {}, 'index')->name('opa');
 
         $routes = [
-            'GET' => [['uri' => '/', 'callback' => function () {}, 'name' => 'index']]
+            'GET' => [$route]
         ];
 
         $this->assertEquals($routes, $router->routes());

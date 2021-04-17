@@ -4,6 +4,8 @@ declare (strict_types = 1);
 
 namespace OpaRoute;
 
+use OpaRoute\Route;
+
 class Router
 {
 
@@ -28,11 +30,11 @@ class Router
      *
      * @param string $uri
      * @param mixed $callback
-     * @return void
+     * @return Route
      */
-    public function get(string $uri, $callback, ?string $name = null): void
+    public function get(string $uri, $callback, ?string $name = null): Route
     {
-        $this->addRoute('GET', $uri, $callback, $name);
+        return $this->addRoute(['GET'], $uri, $callback, $name);
     }
 
     /**
@@ -40,11 +42,11 @@ class Router
      *
      * @param string $uri
      * @param mixed $callback
-     * @return void
+     * @return Route
      */
-    public function post(string $uri, $callback, ?string $name = null): void
+    public function post(string $uri, $callback, ?string $name = null): Route
     {
-        $this->addRoute('POST', $uri, $callback, $name);
+        return $this->addRoute(['POST'], $uri, $callback, $name);
     }
 
     /**
@@ -52,11 +54,11 @@ class Router
      *
      * @param string $uri
      * @param mixed $callback
-     * @return void
+     * @return Route
      */
-    public function put(string $uri, $callback, ?string $name = null): void
+    public function put(string $uri, $callback, ?string $name = null): Route
     {
-        $this->addRoute('PUT', $uri, $callback, $name);
+        return $this->addRoute(['PUT'], $uri, $callback, $name);
     }
 
     /**
@@ -64,11 +66,11 @@ class Router
      *
      * @param string $uri
      * @param mixed $callback
-     * @return void
+     * @return Route
      */
-    public function delete(string $uri, $callback, ?string $name = null): void
+    public function delete(string $uri, $callback, ?string $name = null): Route
     {
-        $this->addRoute('DELETE', $uri, $callback, $name);
+        return $this->addRoute(['DELETE'], $uri, $callback, $name);
     }
 
     /**
@@ -134,20 +136,17 @@ class Router
      * @param string $method
      * @param string $uri
      * @param mixed $callback
-     * @return void
+     * @return Route
      */
-    private function addRoute(string $method, string $uri, $callback, ?string $name = null): void
+    private function addRoute(array $methods, string $uri, $callback, ?string $name = null): Route
     {
-        $route = [
-            'uri'      => $uri,
-            'callback' => $callback
-        ];
+        $route = new Route($methods, $uri, $callback);
 
-        if (null !== $name) {
-            $route['name'] = $name;
+        foreach ($methods as $method) {
+            $this->routes[$method][] = $route;
         }
 
-        $this->routes[$method][] = $route;
+        return $route;
     }
 
     /**

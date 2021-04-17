@@ -27,12 +27,12 @@ class Matcher
      *
      * @param array $routes
      * @param string $requestUri
-     * @return array|null
+     * @return Route|null
      */
-    public function findRoute(array $routes, string $requestUri): ?array
+    public function findRoute(array $routes, string $requestUri): ?Route
     {
         foreach ($routes as $route) {
-            if (true === $this->isEquals($route['uri'], $requestUri)) {
+            if (true === $this->isEquals($route->getUri(), $requestUri)) {
                 return $route;
             }
         }
