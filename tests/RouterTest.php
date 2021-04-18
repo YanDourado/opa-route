@@ -18,12 +18,13 @@ class RouterTest extends TestCase
         $routerDelete = $router->delete('/', function () {});
 
         $routes = [
-            'GET'    => [$routerGet],
-            'POST'   => [$routerPost],
-            'PUT'    => [$routerPut],
-            'DELETE' => [$routerDelete]
+            $routerGet,
+            $routerPost,
+            $routerPut,
+            $routerDelete
         ];
 
+        $this->assertCount(4, $router->routes());
         $this->assertEquals($routes, $router->routes());
     }
 
@@ -34,13 +35,11 @@ class RouterTest extends TestCase
         $routeFoo = $router->get('/foo', function () {});
         $routeBar = $router->get('/bar', function () {});
 
-        $routes = [
-            'GET' => [
-                $routeFoo, $routeBar
-            ]
-        ];
-
-        $this->assertEquals($routes, $router->routes());
+        $this->assertCount(2, $router->routes());
+        $this->assertEquals([
+            $routeFoo,
+            $routeBar
+        ], $router->routes());
     }
 
     public function testAddRouteWithNameInRouter()
@@ -49,11 +48,7 @@ class RouterTest extends TestCase
 
         $route = $router->get('/', function () {}, 'index')->name('opa');
 
-        $routes = [
-            'GET' => [$route]
-        ];
-
-        $this->assertEquals($routes, $router->routes());
+        $this->assertEquals([$route], $router->routes());
     }
 
     public function testWhenRouterIsCreatedRequestMustBeToo()

@@ -67,4 +67,24 @@ class Route
     {
         return $this->uri;
     }
+
+    /**
+     * Return route HTTP methods
+     *
+     * @return array
+     */
+    public function getMethods(): array
+    {
+        return $this->methods;
+    }
+
+    /**
+     * Return route name
+     *
+     * @return string
+     */
+    public function getName(): string
+    {
+        return $this->name;
+    }
 }

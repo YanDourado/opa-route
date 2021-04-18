@@ -4,6 +4,7 @@ declare (strict_types = 1);
 
 namespace OpaRoute;
 
+use OpaRoute\Collections\RouteCollection;
 use OpaRoute\Route;
 
 class Router
@@ -12,7 +13,7 @@ class Router
     /**
      * Array with all routes
      */
-    private array $routes;
+    public RouteCollection $routes;
 
     /**
      *  HTTP Request
@@ -21,7 +22,7 @@ class Router
 
     public function __construct()
     {
-        $this->routes  = [];
+        $this->routes  = new RouteCollection();
         $this->request = self::createRequest();
     }
 
@@ -80,7 +81,7 @@ class Router
      */
     public function routes(): array
     {
-        return $this->routes;
+        return $this->routes->allRoutes();
     }
 
     /**
@@ -91,19 +92,18 @@ class Router
      */
     public function getRoutesByMethod(string $method): ?array
     {
-        return $this->routes[$method] ?? null;
+        return $this->routes->getRoutesByMethod($method);
     }
 
     /**
-     * Get all route except routes with HTTP method
+     * Return all route except routes with HTTP method
+     *
+     * @param string $method
+     * @return array|null
      */
     public function getRoutesWithoutMethod(string $method): ?array
     {
-        $routes = $this->routes();
-        unset($routes[$method]);
-        $routes = array_values($routes);
-        $routes = array_merge(...$routes);
-        return $routes;
+        return $this->routes->getRoutesWithoutMethod($method);
     }
 
     /**
@@ -141,11 +141,7 @@ class Router
     private function addRoute(array $methods, string $uri, $callback, ?string $name = null): Route
     {
         $route = new Route($methods, $uri, $callback);
-
-        foreach ($methods as $method) {
-            $this->routes[$method][] = $route;
-        }
-
+        $this->routes->add($route);
         return $route;
     }
 
