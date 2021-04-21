@@ -93,4 +93,35 @@ class RouterTest extends TestCase
         $this->expectOutputString('hello world');
     }
 
+    public function testCreateARouteGroupMustBeWork()
+    {
+        $router = new Router();
+
+        $router->group([
+            'namespace' => 'Namespace\Controllers',
+            'prefix'    => '/foo'
+        ], function ($router) {
+
+            $router->get('/bar', function () {});
+
+            $router->post('/bar', '\BarController@bar');
+
+            $router->prefix('/bar', function ($router) {
+                $router->get('/{id}', function () {});
+            });
+        });
+
+        $this->assertCount(3, $router->routes());
+
+        $this->assertEquals($router->routes()[0]->getMethods(), ['GET']);
+        $this->assertEquals($router->routes()[0]->getUri(), '/foo/bar');
+
+        $this->assertEquals($router->routes()[1]->getMethods(), ['POST']);
+        $this->assertEquals($router->routes()[1]->getUri(), '/foo/bar');
+        $this->assertEquals($router->routes()[1]->getCallback(), 'Namespace\Controllers\BarController@bar');
+
+        $this->assertEquals($router->routes()[2]->getMethods(), ['GET']);
+        $this->assertEquals($router->routes()[2]->getUri(), '/foo/bar/{id}');
+    }
+
 }

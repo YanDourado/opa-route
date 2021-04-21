@@ -20,6 +20,16 @@ class Router
      */
     private array $request;
 
+    /**
+     * Route prefix for groups
+     */
+    private string $prefix;
+
+    /**
+     * Route namespace for groups
+     */
+    private string $namespace;
+
     public function __construct()
     {
         $this->routes  = new RouteCollection();
@@ -72,6 +82,63 @@ class Router
     public function delete(string $uri, $callback, ?string $name = null): Route
     {
         return $this->addRoute(['DELETE'], $uri, $callback, $name);
+    }
+
+    /**
+     * Set group parameters
+     *
+     * @param array $paramteres
+     * @return void
+     */
+    private function beforeGroup(array $paramteres): void
+    {
+        $this->prefix    = ($this->prefix ?? '') . ($paramteres['prefix'] ?? '');
+        $this->namespace = ($this->namespace ?? '') . ($paramteres['namespace'] ?? '');
+    }
+
+    /**
+     * Reset group parameters
+     *
+     * @param array $paramteres
+     * @return void
+     */
+    private function afterGroup(array $paramteres): void
+    {
+        if ($this->prefix && isset($paramteres['prefix'])) {
+            $this->prefix = str_replace($paramteres['prefix'], '', $this->prefix);
+        }
+
+        if ($this->namespace && isset($paramteres['namespace'])) {
+            $this->namespace = str_replace($paramteres['namespace'], '', $this->namespace);
+        }
+    }
+
+    /**
+     * Create a group of routes
+     *
+     * @param array $paramters
+     * @param callable $routes
+     * @return void
+     */
+    public function group(array $paramteres, callable $callback): void
+    {
+        $this->beforeGroup($paramteres);
+        $callback($this);
+        $this->afterGroup($paramteres);
+    }
+
+    /**
+     * Create a route group with URI prefix
+     *
+     * @param string $prefix
+     * @param callable $callback
+     * @return void
+     */
+    public function prefix(string $prefix, callable $callback): void
+    {
+        $this->group([
+            'prefix' => $prefix
+        ], $callback);
     }
 
     /**
@@ -140,6 +207,14 @@ class Router
      */
     private function addRoute(array $methods, string $uri, $callback, ?string $name = null): Route
     {
+        if (isset($this->prefix)) {
+            $uri = $this->prefix . $uri;
+        }
+
+        if (isset($this->namespace) && true === is_string($callback)) {
+            $callback = $this->namespace . $callback;
+        }
+
         $route = new Route($methods, $uri, $callback);
         $this->routes->add($route);
         return $route;
