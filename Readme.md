@@ -14,28 +14,55 @@ $router = new Router();
 
 $router->get('/', function () {
     return 'Hello World!';
+})->name('home');
+
+$router->group([
+    'namespace' => 'OpaRoute\Namespace\Controller',
+    'prefix'    => '/users'
+], function ($router) {
+    $router->get('', '\UserController@index')->name('users.index');
+
+    $router->get('/{id}', '\UserController@edit')->name('users.edit');
+
+    $router->post('/{id}', '\UserController@save')->name('users.save');
+
+    $router->put('/{id}', '\UserController@update')->name('users.update');
+
+    $router->delete('/{id}', '\UserController@delete')->name('users.delete');
+    
 });
-
-$router->get('/users/{id}', 'UserController@get');
-
-$router->get('/users/{id}/save', [\Namespace\UserController::class, 'post']);
-
 
 $router->execute();
 
-
 // UserController.php
+
+namespace OpaRoute\Namespace\Controller;
 
 class UserController
 {
-    public function get($id)
+    public function index()
     {
-        return 'User: #' . $id;
+        return 'Lists users';
     }
 
-    public function post($id)
+    public function edit($id)
     {
-        // Save user
+        return 'Show user form | ID: #' . $id;
+    }
+
+    public function save($id)
+    {
+        return 'Save user | ID: #' . $id;
+    }
+
+    public function update($id)
+    {
+        return 'Update user | ID: #' . $id;
+    }
+
+    public function delete($id)
+    {
+        return 'Delete user | ID: #' . $id;
     }
 }
 
