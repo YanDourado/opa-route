@@ -12,18 +12,19 @@ class RouterTest extends TestCase
     {
         $router = new Router();
 
-        $router->get('/', function () {});
-        $router->post('/', function () {});
-        $router->put('/', function () {});
-        $router->delete('/', function () {});
+        $routerGet = $router->get('/', function () {});
+        $routerPost = $router->post('/', function () {});
+        $routerPut = $router->put('/', function () {});
+        $routerDelete = $router->delete('/', function () {});
 
         $routes = [
-            'GET'    => [['uri' => '/', 'callback' => function () {}]],
-            'POST'   => [['uri' => '/', 'callback' => function () {}]],
-            'PUT'    => [['uri' => '/', 'callback' => function () {}]],
-            'DELETE' => [['uri' => '/', 'callback' => function () {}]]
+            $routerGet,
+            $routerPost,
+            $routerPut,
+            $routerDelete
         ];
 
+        $this->assertCount(4, $router->routes());
         $this->assertEquals($routes, $router->routes());
     }
 
@@ -31,30 +32,23 @@ class RouterTest extends TestCase
     {
         $router = new Router();
 
-        $router->get('/foo', function () {});
-        $router->get('/bar', function () {});
+        $routeFoo = $router->get('/foo', function () {});
+        $routeBar = $router->get('/bar', function () {});
 
-        $routes = [
-            'GET' => [
-                ['uri' => '/foo', 'callback' => function () {}],
-                ['uri' => '/bar', 'callback' => function () {}]
-            ]
-        ];
-
-        $this->assertEquals($routes, $router->routes());
+        $this->assertCount(2, $router->routes());
+        $this->assertEquals([
+            $routeFoo,
+            $routeBar
+        ], $router->routes());
     }
 
     public function testAddRouteWithNameInRouter()
     {
         $router = new Router();
 
-        $router->get('/', function () {}, 'index');
+        $route = $router->get('/', function () {}, 'index')->name('opa');
 
-        $routes = [
-            'GET' => [['uri' => '/', 'callback' => function () {}, 'name' => 'index']]
-        ];
-
-        $this->assertEquals($routes, $router->routes());
+        $this->assertEquals([$route], $router->routes());
     }
 
     public function testWhenRouterIsCreatedRequestMustBeToo()
@@ -97,6 +91,37 @@ class RouterTest extends TestCase
 
         $router->execute();
         $this->expectOutputString('hello world');
+    }
+
+    public function testCreateARouteGroupMustBeWork()
+    {
+        $router = new Router();
+
+        $router->group([
+            'namespace' => 'Namespace\Controllers',
+            'prefix'    => '/foo'
+        ], function ($router) {
+
+            $router->get('/bar', function () {});
+
+            $router->post('/bar', '\BarController@bar');
+
+            $router->prefix('/bar', function ($router) {
+                $router->get('/{id}', function () {});
+            });
+        });
+
+        $this->assertCount(3, $router->routes());
+
+        $this->assertEquals($router->routes()[0]->getMethods(), ['GET']);
+        $this->assertEquals($router->routes()[0]->getUri(), '/foo/bar');
+
+        $this->assertEquals($router->routes()[1]->getMethods(), ['POST']);
+        $this->assertEquals($router->routes()[1]->getUri(), '/foo/bar');
+        $this->assertEquals($router->routes()[1]->getCallback(), 'Namespace\Controllers\BarController@bar');
+
+        $this->assertEquals($router->routes()[2]->getMethods(), ['GET']);
+        $this->assertEquals($router->routes()[2]->getUri(), '/foo/bar/{id}');
     }
 
 }

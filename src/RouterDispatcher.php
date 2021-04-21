@@ -53,17 +53,19 @@ class RouterDispatcher
     /**
      * Handle route callback
      *
-     * @param array $route
+     * @param Route $route
      * @return mixed
      */
-    private function handle(array $route)
+    private function handle(Route $route)
     {
-        if (true === is_callable($route['callback'])) {
-            $response = $this->handleFunction($route['callback']);
+        $routeCallback = $route->getCallback();
+
+        if (true === is_callable($routeCallback)) {
+            $response = $this->handleFunction($routeCallback);
         }
 
-        if (true === is_string($route['callback'])) {
-            $response = $this->handleController($route['callback']);
+        if (true === is_string($routeCallback)) {
+            $response = $this->handleController($routeCallback);
         }
 
         if (true === is_array($response)) {

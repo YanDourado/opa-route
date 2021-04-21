@@ -19,7 +19,7 @@ class MatcherTest extends TestCase
         $matcher    = new Matcher();
         $routeFound = $matcher->findRoute($router->getRoutesByMethod('GET'), '/foo');
 
-        $this->assertSame('/foo', $routeFound['uri']);
+        $this->assertSame('/foo', $routeFound->getUri());
     }
 
     public function testCheckIfDynamicRouteExist()
@@ -33,7 +33,7 @@ class MatcherTest extends TestCase
         $matcher    = new Matcher();
         $routeFound = $matcher->findRoute($router->getRoutesByMethod('GET'), '/users/1');
 
-        $this->assertSame('/users/{id}', $routeFound['uri']);
+        $this->assertSame('/users/{id}', $routeFound->getUri());
     }
 
     public function testCheckDynamicRouteParameters()

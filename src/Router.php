@@ -4,22 +4,35 @@ declare (strict_types = 1);
 
 namespace OpaRoute;
 
+use OpaRoute\Collections\RouteCollection;
+use OpaRoute\Route;
+
 class Router
 {
 
     /**
      * Array with all routes
      */
-    private array $routes;
+    public RouteCollection $routes;
 
     /**
      *  HTTP Request
      */
     private array $request;
 
+    /**
+     * Route prefix for groups
+     */
+    private string $prefix;
+
+    /**
+     * Route namespace for groups
+     */
+    private string $namespace;
+
     public function __construct()
     {
-        $this->routes  = [];
+        $this->routes  = new RouteCollection();
         $this->request = self::createRequest();
     }
 
@@ -28,11 +41,11 @@ class Router
      *
      * @param string $uri
      * @param mixed $callback
-     * @return void
+     * @return Route
      */
-    public function get(string $uri, $callback, ?string $name = null): void
+    public function get(string $uri, $callback, ?string $name = null): Route
     {
-        $this->addRoute('GET', $uri, $callback, $name);
+        return $this->addRoute(['GET'], $uri, $callback, $name);
     }
 
     /**
@@ -40,11 +53,11 @@ class Router
      *
      * @param string $uri
      * @param mixed $callback
-     * @return void
+     * @return Route
      */
-    public function post(string $uri, $callback, ?string $name = null): void
+    public function post(string $uri, $callback, ?string $name = null): Route
     {
-        $this->addRoute('POST', $uri, $callback, $name);
+        return $this->addRoute(['POST'], $uri, $callback, $name);
     }
 
     /**
@@ -52,11 +65,11 @@ class Router
      *
      * @param string $uri
      * @param mixed $callback
-     * @return void
+     * @return Route
      */
-    public function put(string $uri, $callback, ?string $name = null): void
+    public function put(string $uri, $callback, ?string $name = null): Route
     {
-        $this->addRoute('PUT', $uri, $callback, $name);
+        return $this->addRoute(['PUT'], $uri, $callback, $name);
     }
 
     /**
@@ -64,11 +77,68 @@ class Router
      *
      * @param string $uri
      * @param mixed $callback
+     * @return Route
+     */
+    public function delete(string $uri, $callback, ?string $name = null): Route
+    {
+        return $this->addRoute(['DELETE'], $uri, $callback, $name);
+    }
+
+    /**
+     * Set group parameters
+     *
+     * @param array $paramteres
      * @return void
      */
-    public function delete(string $uri, $callback, ?string $name = null): void
+    private function beforeGroup(array $paramteres): void
     {
-        $this->addRoute('DELETE', $uri, $callback, $name);
+        $this->prefix    = ($this->prefix ?? '') . ($paramteres['prefix'] ?? '');
+        $this->namespace = ($this->namespace ?? '') . ($paramteres['namespace'] ?? '');
+    }
+
+    /**
+     * Reset group parameters
+     *
+     * @param array $paramteres
+     * @return void
+     */
+    private function afterGroup(array $paramteres): void
+    {
+        if ($this->prefix && isset($paramteres['prefix'])) {
+            $this->prefix = str_replace($paramteres['prefix'], '', $this->prefix);
+        }
+
+        if ($this->namespace && isset($paramteres['namespace'])) {
+            $this->namespace = str_replace($paramteres['namespace'], '', $this->namespace);
+        }
+    }
+
+    /**
+     * Create a group of routes
+     *
+     * @param array $paramters
+     * @param callable $routes
+     * @return void
+     */
+    public function group(array $paramteres, callable $callback): void
+    {
+        $this->beforeGroup($paramteres);
+        $callback($this);
+        $this->afterGroup($paramteres);
+    }
+
+    /**
+     * Create a route group with URI prefix
+     *
+     * @param string $prefix
+     * @param callable $callback
+     * @return void
+     */
+    public function prefix(string $prefix, callable $callback): void
+    {
+        $this->group([
+            'prefix' => $prefix
+        ], $callback);
     }
 
     /**
@@ -78,7 +148,7 @@ class Router
      */
     public function routes(): array
     {
-        return $this->routes;
+        return $this->routes->allRoutes();
     }
 
     /**
@@ -89,19 +159,18 @@ class Router
      */
     public function getRoutesByMethod(string $method): ?array
     {
-        return $this->routes[$method] ?? null;
+        return $this->routes->getRoutesByMethod($method);
     }
 
     /**
-     * Get all route except routes with HTTP method
+     * Return all route except routes with HTTP method
+     *
+     * @param string $method
+     * @return array|null
      */
     public function getRoutesWithoutMethod(string $method): ?array
     {
-        $routes = $this->routes();
-        unset($routes[$method]);
-        $routes = array_values($routes);
-        $routes = array_merge(...$routes);
-        return $routes;
+        return $this->routes->getRoutesWithoutMethod($method);
     }
 
     /**
@@ -134,20 +203,21 @@ class Router
      * @param string $method
      * @param string $uri
      * @param mixed $callback
-     * @return void
+     * @return Route
      */
-    private function addRoute(string $method, string $uri, $callback, ?string $name = null): void
+    private function addRoute(array $methods, string $uri, $callback, ?string $name = null): Route
     {
-        $route = [
-            'uri'      => $uri,
-            'callback' => $callback
-        ];
-
-        if (null !== $name) {
-            $route['name'] = $name;
+        if (isset($this->prefix)) {
+            $uri = $this->prefix . $uri;
         }
 
-        $this->routes[$method][] = $route;
+        if (isset($this->namespace) && true === is_string($callback)) {
+            $callback = $this->namespace . $callback;
+        }
+
+        $route = new Route($methods, $uri, $callback);
+        $this->routes->add($route);
+        return $route;
     }
 
     /**
