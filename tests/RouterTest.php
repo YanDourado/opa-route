@@ -3,6 +3,7 @@
 namespace YanDourado\Test;
 
 use OpaRoute\Router;
+use OpaRoute\Route\Callback;
 use PHPUnit\Framework\TestCase;
 
 class RouterTest extends TestCase
@@ -118,7 +119,7 @@ class RouterTest extends TestCase
 
         $this->assertEquals($router->routes()[1]->getMethods(), ['POST']);
         $this->assertEquals($router->routes()[1]->getUri(), '/foo/bar');
-        $this->assertEquals($router->routes()[1]->getCallback(), 'Namespace\Controllers\BarController@bar');
+        $this->assertEquals($router->routes()[1]->getCallback(), new Callback('Namespace\Controllers\BarController@bar'));
 
         $this->assertEquals($router->routes()[2]->getMethods(), ['GET']);
         $this->assertEquals($router->routes()[2]->getUri(), '/foo/bar/{id}');

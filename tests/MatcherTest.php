@@ -44,6 +44,6 @@ class MatcherTest extends TestCase
         $matcher = new Matcher();
         $matcher->findRoute($router->getRoutesByMethod('GET'), '/foo/hello/bar/world');
 
-        $this->assertSame(['hello', 'world'], $matcher->parameters());
+        $this->assertSame(['foo' => 'hello', 'bar' => 'world'], $matcher->parameters());
     }
 }
