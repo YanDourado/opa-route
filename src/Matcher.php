@@ -19,7 +19,32 @@ class Matcher
      */
     public function parameters(): array
     {
-        return array_slice($this->parameters, 1);
+        return $this->parameters;
+    }
+
+    /**
+     * Set URL paramenters values
+     *
+     * @param array $parametersValue
+     * @return void
+     */
+    private function setParametersValues(array $parametersValue): void
+    {
+        $parameters = [];
+        foreach ($this->parameters as $key => $value) {
+            $parameters[$value] = $parametersValue[$key];
+        }
+        $this->parameters = $parameters;
+    }
+
+    /**
+     * Reset URL paramenters values
+     *
+     * @return void
+     */
+    private function resetParameters(): void
+    {
+        $this->parameters = [];
     }
 
     /**
@@ -48,6 +73,7 @@ class Matcher
      */
     private function isEquals(string $routeUri, string $requestUri): bool
     {
+        $this->resetParameters();
         $isDynamicRoute = $this->isDynamicRoute($routeUri);
 
         if (false === $isDynamicRoute) {
@@ -77,12 +103,10 @@ class Matcher
      */
     private function parseUri(string $uri): string
     {
-        preg_match_all('/\{(.*?)\}/', $uri, $matches);
-
-        foreach ($matches[0] as $match) {
-            $uri = str_replace($match, '([a-zA-Z0-9\-\_]+)', $uri);
-        }
-        return $uri;
+        return preg_replace_callback('/\{(.*?)\}/', function ($matches) {
+            $this->parameters[] = $matches[1];
+            return '([a-zA-Z0-9\-\_]+)';
+        }, $uri);
     }
 
     /**
@@ -95,7 +119,10 @@ class Matcher
     private function match(string $parsedUri, string $requestUri): bool
     {
         $pattern = "@^$parsedUri$@D";
-        return (bool) preg_match($pattern, $requestUri, $this->parameters);
+        if ($match = (bool) preg_match($pattern, $requestUri, $parameters)) {
+            $this->setParametersValues(array_slice($parameters, 1));
+        }
+        return $match;
     }
 
 }

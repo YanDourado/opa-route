@@ -4,6 +4,8 @@ declare (strict_types = 1);
 
 namespace OpaRoute;
 
+use OpaRoute\Route\Callback;
+
 class Route
 {
     /**
@@ -32,7 +34,7 @@ class Route
     {
         $this->uri      = $uri;
         $this->methods  = $methods;
-        $this->callback = $callback;
+        $this->callback = new Callback($callback);
         $this->name     = '';
     }
 
@@ -51,9 +53,9 @@ class Route
     /**
      * Return route callback
      *
-     * @return mixed
+     * @return Callback
      */
-    public function getCallback()
+    public function getCallback(): Callback
     {
         return $this->callback;
     }
