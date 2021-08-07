@@ -4,6 +4,8 @@ namespace OpaRoute;
 
 use OpaRoute\Matcher;
 use OpaRoute\Router;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 
 class RouterDispatcher
 {
@@ -14,21 +16,26 @@ class RouterDispatcher
 
     private Matcher $matcher;
 
+    private Response $response;
+
     public function __construct(Router $router)
     {
-        $this->router  = $router;
-        $this->matcher = new Matcher();
+        $this->router   = $router;
+        $this->matcher  = new Matcher();
+        $this->response = new Response();
     }
 
     /**
      * Dispatch a route with base on Request URI and Method
      *
-     * @param string $uri
-     * @param string $method
-     * @return mixed
+     * @param Request $request
+     * @return Response
      */
-    public function dispatch(string $uri, string $method)
+    public function dispatch(Request $request): Response
     {
+        $method = $request->getMethod();
+        $uri    = $request->getPathInfo();
+
         $methodRoutes = $this->router->getRoutesByMethod($method);
 
         if (null === $methodRoutes
@@ -47,26 +54,31 @@ class RouterDispatcher
             throw new \Exception('Route not found');
         }
 
-        return $this->handle($route);
+        return $this->handle($route, $request);
     }
 
     /**
      * Handle route callback
      *
      * @param Route $route
-     * @return mixed
+     * @param Request $request
+     * @return Response
      */
-    private function handle(Route $route)
+    private function handle(Route $route, Request $request): Response
     {
         $callback = $route->getCallback();
 
-        $response = $callback->handle($this->matcher->parameters());
+        $response = $callback->handle($request, $this->matcher->parameters());
 
-        if (true === is_array($response)) {
-            $response = json_encode($response);
+        if ($response instanceof Response) {
+            $this->response = $response;
+        } else if (true === is_array($response) || true === is_object($response)) {
+            $this->response = new Response(json_encode($response));
+        } else if (is_string($response)) {
+            $this->response = new Response($response);
         }
 
-        return $response;
+        return $this->response;
     }
 
     /**

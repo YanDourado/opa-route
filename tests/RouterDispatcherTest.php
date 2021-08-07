@@ -5,6 +5,8 @@ namespace OpaRoute\Test;
 use OpaRoute\Router;
 use OpaRoute\RouterDispatcher;
 use PHPUnit\Framework\TestCase;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 
 class RouterDispatcherTest extends TestCase
 {
@@ -24,8 +26,8 @@ class RouterDispatcherTest extends TestCase
         $dispatcher = new RouterDispatcher($router);
         $dispatcher = new RouterDispatcher($router);
 
-        $this->assertEquals('Hello World!', $dispatcher->dispatch('/', 'GET'));
-        $this->assertEquals(json_encode(['name' => 'Yan Dourado']), $dispatcher->dispatch('/', 'POST'));
+        $this->assertEquals(new Response('Hello World!'), $dispatcher->dispatch(Request::create('/', 'GET')));
+        $this->assertEquals(new Response(json_encode(['name' => 'Yan Dourado'])), $dispatcher->dispatch(Request::create('/', 'POST')));
     }
 
     public function testDifferentsFunctionHandleMustBeExecute()
@@ -40,9 +42,9 @@ class RouterDispatcherTest extends TestCase
 
         $dispatcher = new RouterDispatcher($router);
 
-        $this->assertEquals('Hello World! GET', $dispatcher->dispatch('/', 'GET'));
-        $this->assertEquals('Hello World! POST', $dispatcher->dispatch('/', 'POST'));
-        $this->assertEquals('Hello World! PUT', $dispatcher->dispatch('/', 'PUT'));
+        $this->assertEquals(new Response('Hello World! GET'), $dispatcher->dispatch(Request::create('/', 'GET')));
+        $this->assertEquals(new Response('Hello World! POST'), $dispatcher->dispatch(Request::create('/', 'POST')));
+        $this->assertEquals(new Response('Hello World! PUT'), $dispatcher->dispatch(Request::create('/', 'PUT')));
     }
 
     public function testErroRouteNotExist()
@@ -58,7 +60,7 @@ class RouterDispatcherTest extends TestCase
 
         $dispatcher = new RouterDispatcher($router);
 
-        $dispatcher->dispatch('/foo', 'GET');
+        $dispatcher->dispatch(Request::create('/foo', 'GET'));
     }
 
     public function testErroMethodNotAllowed()
@@ -78,7 +80,7 @@ class RouterDispatcherTest extends TestCase
 
         $dispatcher = new RouterDispatcher($router);
 
-        $dispatcher->dispatch('/', 'GET');
+        $dispatcher->dispatch(Request::create('/', 'GET'));
     }
 
     public function testErrorClassNotExist()
@@ -91,7 +93,7 @@ class RouterDispatcherTest extends TestCase
 
         $dispatcher = new RouterDispatcher($router);
 
-        $dispatcher->dispatch('/', 'POST');
+        $dispatcher->dispatch(Request::create('/', 'POST'));
     }
 
     public function testErrorMethodNotExist()
@@ -104,7 +106,7 @@ class RouterDispatcherTest extends TestCase
 
         $dispatcher = new RouterDispatcher($router);
 
-        $dispatcher->dispatch('/', 'POST');
+        $dispatcher->dispatch(Request::create('/', 'POST'));
     }
 }
 

@@ -4,6 +4,8 @@ declare (strict_types = 1);
 
 namespace OpaRoute\Route;
 
+use Symfony\Component\HttpFoundation\Request;
+
 class Callback
 {
 
@@ -65,9 +67,11 @@ class Callback
     /**
      * Handle route callback
      *
-     * @return mixed
+     * @param array $parameters
+     * @param Request $request
+     * @return void
      */
-    public function handle(array $parameters = [])
+    public function handle(Request $request, array $parameters = [])
     {
         if (Callback::TYPE_STRING === $this->typeCallback || Callback::TYPE_ARRAY === $this->typeCallback) {
             $this->prepareController()
@@ -75,7 +79,7 @@ class Callback
         }
 
         $reflection = $this->getReflection();
-        $args       = $this->getArguments($reflection, $parameters);
+        $args       = $this->getArguments($reflection, $request, $parameters);
 
         if (true === is_callable($this->callback)) {
             $response = $this->handleFunction($args);
@@ -157,15 +161,18 @@ class Callback
      * Return callback arguments
      *
      * @param \ReflectionFunctionAbstract $reflection
+     * @param Request $request
      * @param array $parameters
      * @return array
      */
-    private function getArguments(\ReflectionFunctionAbstract $reflection, array $parameters = []): array
+    private function getArguments(\ReflectionFunctionAbstract $reflection, Request $request, array $parameters = []): array
     {
         $args             = [];
         $parametersValues = array_values($parameters);
         foreach ($reflection->getParameters() as $key => $parameter) {
-            if (null !== $type = $parameter->getType()) {
+            if (Request::class === (string) $parameter->getType()) {
+                $parametersValues[$key] = $request;
+            } else if (null !== $type = $parameter->getType()) {
                 settype($parametersValues[$key], (string) $type);
             }
 

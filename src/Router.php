@@ -6,6 +6,7 @@ namespace OpaRoute;
 
 use OpaRoute\Collections\RouteCollection;
 use OpaRoute\Route;
+use Symfony\Component\HttpFoundation\Request;
 
 class Router
 {
@@ -18,7 +19,7 @@ class Router
     /**
      *  HTTP Request
      */
-    private array $request;
+    private Request $request;
 
     /**
      * Route prefix for groups
@@ -176,9 +177,9 @@ class Router
     /**
      * Return URI and METHOD from HTTP request
      *
-     * @return array
+     * @return Request
      */
-    public function request(): array
+    public function request(): Request
     {
         return $this->request;
     }
@@ -191,10 +192,9 @@ class Router
     public function execute()
     {
         $dispatcher = new RouterDispatcher($this);
-        echo $dispatcher->dispatch(
-            $this->request['uri'],
-            $this->request['method']
-        );
+        $dispatcher->dispatch($this->request)
+            ->prepare($this->request())
+            ->send();
     }
 
     /**
@@ -223,13 +223,10 @@ class Router
     /**
      * Create Request (URI and METHOD) from Globals
      *
-     * @return array
+     * @return Request
      */
-    private static function createRequest(): array
+    private static function createRequest(): Request
     {
-        return [
-            'uri'    => isset($_SERVER['REQUEST_URI']) ? parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH) : null,
-            'method' => isset($_SERVER['REQUEST_METHOD']) ? parse_url($_SERVER['REQUEST_METHOD'], PHP_URL_PATH) : null
-        ];
+        return Request::createFromGlobals();
     }
 }

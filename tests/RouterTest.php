@@ -60,9 +60,9 @@ class RouterTest extends TestCase
         $router = new Router();
 
         $this->assertEquals([
-            'uri'    => '/foo',
-            'method' => 'GET'
-        ], $router->request());
+            '/foo',
+            'GET'
+        ], [$router->request()->getPathInfo(), $router->request()->getMethod()]);
     }
 
     public function testIfRouteExistItMustBeExecute()
